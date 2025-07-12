@@ -1,0 +1,54 @@
+/**
+ * Calculates the best price for a grocery item under the three–tier pricing scheme.
+ *
+ * @param customerType "walk-in" or "member"
+ * @param quantity     requested quantity (must be > 0)
+ * @param product      the Product row read from the database
+ *
+ * @return Map with keys:
+ *   "final_price" (Double),
+ *   "price_tier"  ("retail"|"member"|"bulk"),
+ *   "savings"     (Double, positive when cheaper than retail)
+ *
+ *   Returns null if product == null or quantity <= 0.
+ */
+fun calculatePrice(
+    customerType: String,
+    quantity: Double,
+    product: Product?
+): Map<String, Any>? {
+
+    if (product == null || quantity <= 0.0) return null
+
+    val retail  = product.retail_price
+    val member  = product.member_price
+    val bulk    = product.bulk_price
+    val bulkMin = product.bulk_min_qty
+
+    val eligibleForBulk = quantity >= bulkMin
+
+    val (finalPrice, tier) = when (customerType) {
+        "walk-in" -> {
+            if (eligibleForBulk) bulk to "bulk"
+            else retail to "retail"
+        }
+        "member"  -> {
+            if (eligibleForBulk) {
+                // choose the cheaper of member vs bulk
+                if (bulk < member) bulk to "bulk"
+                else member to "member"
+            } else {
+                member to "member"
+            }
+        }
+        else -> return null   // unknown customer type
+    }
+
+    val savings = retail - finalPrice   // positive when cheaper than retail
+
+    return mapOf(
+        "final_price" to finalPrice,
+        "price_tier"  to tier,
+        "savings"     to savings
+    )
+}
