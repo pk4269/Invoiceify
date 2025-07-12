@@ -1,0 +1,9 @@
+binding.btnPrintLabel.setOnClickListener {
+    val bmp = binding.ivBarcode.drawable.toBitmap()
+    val escPos = ThermalPrinterHelper.build80mmLabel(
+        productName = product.name,
+        barcodeBmp = bmp,
+        barcodeText = binding.tvBarcode.text.toString()
+    )
+    bluetoothPrinter.send(escPos)
+}
