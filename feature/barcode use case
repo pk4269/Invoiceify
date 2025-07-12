@@ -1,0 +1,11 @@
+binding.btnSave.setOnClickListener {
+    val barcode = binding.etBarcode.text?.toString()
+        .ifBlank { null }
+
+    val bitmap = BarcodeGenerator.generateBarcodeBitmap(
+        itemId = viewModel.generateNewId(),   // your logic
+        category = binding.actCategory.text.toString(),
+        existingBarcode = barcode
+    )
+    // save bitmap & barcode text into Product entity
+}
