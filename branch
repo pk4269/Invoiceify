@@ -1,0 +1,10 @@
+git checkout -b feature/product-schema
+
+mkdir -p app/src/main/java/com/yourname/grocerystore/data/entity
+touch app/src/main/java/com/yourname/grocerystore/data/entity/Product.kt
+touch app/src/main/java/com/yourname/grocerystore/data/dao/ProductDao.kt
+
+git add .
+git commit -m "feat: add Product entity & DAO skeleton"
+
+git push -u origin feature/product-schema
