@@ -1,0 +1,9 @@
+binding.btnGenBarcode.setOnClickListener {
+    val bmp = BarcodeGenerator.generateBarcodeBitmap(
+        itemId = product.id.toString(),
+        category = product.category,
+        existingBarcode = null          // force new CODE_128
+    )
+    binding.ivBarcode.setImageBitmap(bmp)
+    binding.tvBarcode.text = "STORE-${product.id}-${product.category.take(4).uppercase()}"
+}
