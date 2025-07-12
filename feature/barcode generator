@@ -1,0 +1,49 @@
+implementation("com.google.zxing:core:3.5.3")
+
+object BarcodeGenerator {
+
+    fun generateBarcodeBitmap(
+        itemId: String,
+        category: String,
+        existingBarcode: String? = null,
+        format: BarcodeFormat = BarcodeFormat.CODE_128,
+        widthPx: Int = 400,
+        heightPx: Int = 160
+    ): Bitmap? = runCatching {
+        val content = when {
+            existingBarcode != null && isValidEanUpc(existingBarcode) -> existingBarcode
+            else -> "STORE-$itemId-${category.take(4).uppercase()}"
+        }
+
+        val hints = mapOf(
+            EncodeHintType.MARGIN to 0,
+            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L
+        )
+        val matrix = MultiFormatWriter().encode(
+            content,
+            if (existingBarcode != null && isValidEanUpc(existingBarcode)) {
+                if (existingBarcode.length == 12) BarcodeFormat.UPC_A else BarcodeFormat.EAN_13
+            } else format,
+            widthPx,
+            heightPx,
+            hints
+        )
+        createBitmap(matrix)
+    }.getOrNull()
+
+    /* ---------- helpers ---------- */
+    private fun isValidEanUpc(code: String) =
+        (code.length == 12 || code.length == 13) && code.all(Char::isDigit)
+
+    private fun createBitmap(matrix: BitMatrix): Bitmap {
+        val w = matrix.width
+        val h = matrix.height
+        return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply {
+            for (x in 0 until w) {
+                for (y in 0 until h) {
+                    setPixel(x, y, if (matrix[x, y]) Color.BLACK else Color.WHITE)
+                }
+            }
+        }
+    }
+}
